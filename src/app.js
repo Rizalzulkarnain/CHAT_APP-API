@@ -6,6 +6,9 @@ const staticGzip = require('express-static-gzip');
 require('./utils/util.pluginMiddleware')(app);
 require('./utils/util.routeMiddleware')(app);
 
+app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/uploads'));
+
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(resolve(process.cwd(), 'client/build')));
   app.use(

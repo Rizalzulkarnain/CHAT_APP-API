@@ -66,6 +66,7 @@ if (cluster.isMaster) {
       process.exit(process.exitCode);
     });
   }
+
   // listening server port
   http.listen(process.env.PORT, () =>
     console.log(`server is running on ${process.env.PORT}`)

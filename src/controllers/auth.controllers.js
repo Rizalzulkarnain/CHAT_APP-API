@@ -1,18 +1,13 @@
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const User = require('../models').User;
-const config = require('../config/config');
-
-const generateTokenUser = (user) => {
-  delete user.password;
-
-  const token = JWT.sign(user, config.appKey, { expiresIn: 86400 });
-
-  return { ...user, ...{ token } };
-};
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+
+  if (req.file) {
+    req.body.avatar = req.file.filename;
+  }
 
   try {
     const user = await User.findOne({
@@ -24,18 +19,19 @@ exports.login = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: `User not found` || error.message,
+        error: `User not found`,
       });
     }
 
     if (!bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({
         success: false,
-        error: `Incorrect Password...!` || error.message,
+        error: `Incorrect Password...!`,
       });
     }
 
     const userWithToken = generateTokenUser(user.get({ raw: true }));
+    userWithToken.user.avatar = user.avatar;
 
     res.status(201).json({
       success: true,
@@ -64,4 +60,12 @@ exports.register = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+const generateTokenUser = (user) => {
+  delete user.password;
+
+  const token = JWT.sign(user, process.env.KEY, { expiresIn: 86400 });
+
+  return { ...{ user }, ...{ token } };
 };
